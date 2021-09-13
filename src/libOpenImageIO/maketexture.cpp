@@ -440,7 +440,7 @@ static void
 normal_gradient(const ImageBuf& src, const ImageBuf::Iterator<float>& dstpix,
                 float* h, float* dh_ds, float* dh_dt)
 {
-    // TODO: if this breask anyting, this might need to be an option
+    // TODO: if this breaks anything, this might need to be an option
     // added as an option.
     //
     // Tangent space normals are by convension written "packed"
@@ -464,7 +464,7 @@ normal_gradient(const ImageBuf& src, const ImageBuf::Iterator<float>& dstpix,
 
     *h = 1.0f;
 
-    // The slopes we derive by requring that
+    // The slopes we derive by requiring that
     // the dot product between the slope  vector and the normal
     // should be 0:
     //
