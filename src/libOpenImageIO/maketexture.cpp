@@ -440,12 +440,56 @@ static void
 normal_gradient(const ImageBuf& src, const ImageBuf::Iterator<float>& dstpix,
                 float* h, float* dh_ds, float* dh_dt)
 {
-    // assume a normal defined in the tangent space
+    // TODO: if this breask anyting, this might need to be an option
+    // added as an option.
+    //
+    // Tangent space normals are by convension written "packed"
+    // between 0 and 1, but really we allow the coefficients to
+    // go between -1 and 1. In fact, Personally I think this
+    // should be the default behavior.
+
     float n[3];
     src.getpixel(dstpix.x(), dstpix.y(), n, 3);
-    *h     = -1.0f;
+
+    //Put each normal coefficient in the -1 to 1 range
+
+    n[0] = n[0] * 2 - 1;
+    n[1] = n[1] * 2 - 1;
+    n[2] = n[2] * 2 - 1;
+
+    // Note that we don't need to normalize anything
+    // since the slopes we use the for further down
+    // divide n[0]/n[2] and n[1]/n[2] so the normalization
+    // cancels out.
+
+    *h = 1.0f;
+
+    // The slopes we derive by requring that
+    // the dot product between the slope  vector and the normal
+    // should be 0:
+    //
+    // dit((ds,dh), (n[0],n[2])) = 0
+    // dit((dt,dh), (n[1],n[2])) = 0
+    //
+    // which gives us:
+
     *dh_ds = -n[0] / n[2];
     *dh_dt = -n[1] / n[2];
+
+    // To turn these into normals in a shader, you can do a cross
+    // product of
+    // v1 = Tangent*ds + dh_ds * N * ds
+    // v2 = BiTangent*dt + dh_dt * N * dt
+    //
+    // where Tangent, BiTangent and N are all orthogonal to each other.
+    //
+    // We can cancel ds and dt since they don't contribute to the vector
+    // directions, and we get
+    //
+    // v1 = Tangent + dh_ds*N
+    // v2 = BiTangent + dh_dt*N
+    //
+    // n = cross(v1,v2) = -Tangent * dh_ds - BiTangent*dh_dt + N*h;
 }
 
 
