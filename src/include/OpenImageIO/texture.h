@@ -1563,6 +1563,11 @@ public:
                           Perthread *thread_info, int subimage,
                           ustring dataname, TypeDesc datatype, void *data) = 0;
 
+    // Support indexed lookup of arrays
+    virtual bool get_texture_info (TextureHandle *texture_handle,
+                          Perthread *thread_info, int subimage,
+                          ustring dataname, TypeDesc datatype, int index, void *data) = 0;
+
     /// Copy the ImageSpec associated with the named texture (the first
     /// subimage by default, or as set by `subimage`).
     ///

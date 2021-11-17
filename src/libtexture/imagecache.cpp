@@ -2822,6 +2822,31 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
 #undef ATTR_DECODE
 }
 
+bool
+ImageCacheImpl::get_image_info(ImageCacheFile* file,
+                               ImageCachePerThreadInfo* thread_info,
+                               int subimage, int miplevel, ustring dataname,
+                               TypeDesc datatype, int index, void* data)
+
+    // general case -- handle anything else that's able to be found by
+    // spec.find_attribute().
+    ParamValue tmpparam;
+    const ParamValue* p = spec.find_attribute(dataname, tmpparam);
+    if (p && p->type().basevalues() == datatype.basevalues()) {
+        // First test for exact base type match
+        if (p->type().basetype == datatype.basetype) {
+            memcpy(data, p->data(), datatype.size());
+            return true;
+        }
+        // If the real data is int but user asks for float, translate it
+        if (p->type().basetype == TypeDesc::FLOAT
+            && datatype.basetype == TypeDesc::INT) {
+            for (int i = 0; i < int(p->type().basevalues()); ++i)
+                ((float*)data)[i] = ((int*)p->data())[i];
+            return true;
+        }
+    }
+}
 
 
 bool
