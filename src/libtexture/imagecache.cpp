@@ -2561,6 +2561,8 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
         return true;                                                     \
     }
 
+    std::cout << "Getting image info\n";
+
     if (!thread_info)
         thread_info = get_perthread_info();
     ImageCacheStatistics& stats(thread_info->m_stats);
@@ -2827,25 +2829,39 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
                                ImageCachePerThreadInfo* thread_info,
                                int subimage, int miplevel, ustring dataname,
                                TypeDesc datatype, int index, void* data)
-
+{
+    std::cout << "ImageCacheImpl::get_image_info " << dataname << "\n";
     // general case -- handle anything else that's able to be found by
     // spec.find_attribute().
+
+    ImageCacheStatistics& stats(thread_info->m_stats);
+    ++stats.imageinfo_queries;
+    file = verify_file(file, thread_info, true);
+
+    const ImageSpec& spec(file->spec(subimage, miplevel));
     ParamValue tmpparam;
     const ParamValue* p = spec.find_attribute(dataname, tmpparam);
-    if (p && p->type().basevalues() == datatype.basevalues()) {
-        // First test for exact base type match
-        if (p->type().basetype == datatype.basetype) {
-            memcpy(data, p->data(), datatype.size());
+    // First test for exact base type match
+    //if (p && p->type().elementtype() == datatype.elementtype()) {
+    if (p){
+        std::cout << "basetype matches " << dataname << "\n";
+        // If the real data is int but user asks for float, translate it
+        if (index <  int(p->type().basevalues())){
+            std::cout << "index " << index << " #basevalues " <<  int(p->type().basevalues()) << "\n";
+            ((float *)data)[0] = ((float *)p->data())[index];
+            std::cout << "Value : " << ((float *)p->data())[index] << "\n";
+
             return true;
         }
-        // If the real data is int but user asks for float, translate it
-        if (p->type().basetype == TypeDesc::FLOAT
-            && datatype.basetype == TypeDesc::INT) {
-            for (int i = 0; i < int(p->type().basevalues()); ++i)
-                ((float*)data)[i] = ((int*)p->data())[i];
+
+    } else if (p && p->type().basetype == TypeDesc::FLOAT
+               && datatype.basetype == TypeDesc::INT) {
+        if (index <  int(p->type().basevalues())){
+            ((float*)data)[0] = ((int*)p->data())[index];
             return true;
         }
     }
+    return false;
 }
 
 

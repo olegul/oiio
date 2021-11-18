@@ -657,6 +657,12 @@ public:
                          int subimage, int miplevel,
                          ustring dataname, TypeDesc datatype, void *data) = 0;
 
+
+    // Add support for indexed array lookup
+    virtual bool get_image_info (ImageHandle *file, Perthread *thread_info,
+                         int subimage, int miplevel,
+                         ustring dataname, TypeDesc datatype, int index, void *data) = 0;
+
     /// Copy the ImageSpec associated with the named image (the first
     /// subimage & miplevel by default, or as set by `subimage` and
     /// `miplevel`).
