@@ -2842,9 +2842,10 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
     ParamValue tmpparam;
     const ParamValue* p = spec.find_attribute(dataname, tmpparam);
 
-    // First test for exact base type match
+    // First test for exact base type match - say if we have a float
+    // in, we should be reading a float or a float[]
     if (p && p->type().elementtype() == datatype.elementtype()) {
-        if (index < int(p->type().basevalues())) {
+        if (index >= 0 && index < int(p->type().basevalues())) {
             for (int i = 0; i < datatype.size(); i++) {
                 ((char*)data)[i] = ((char*)p->data())[index*datatype.size()+i];
             }
