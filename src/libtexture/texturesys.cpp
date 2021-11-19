@@ -580,7 +580,7 @@ TextureSystemImpl::get_texture_info(TextureHandle* texture_handle,
     bool ok
         = m_imagecache->get_image_info((ImageCache::ImageHandle*)texture_handle,
                                        (ImageCache::Perthread*)thread_info,
-                                       subimage, 0, dataname, datatype,index, data);
+                                       subimage, 0, dataname, datatype, index, data);
     if (!ok) {
         std::string err = m_imagecache->geterror();
         if (!err.empty())

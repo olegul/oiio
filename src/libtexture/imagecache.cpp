@@ -2830,9 +2830,9 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
                                int subimage, int miplevel, ustring dataname,
                                TypeDesc datatype, int index, void* data)
 {
-    std::cout << "ImageCacheImpl::get_image_info " << dataname << "\n";
-    // general case -- handle anything else that's able to be found by
-    // spec.find_attribute().
+    // This is a special case of the "general case" above: if we're
+    // looking up an array attribute, we also support looking up
+    // a specific index of that attribute
 
     ImageCacheStatistics& stats(thread_info->m_stats);
     ++stats.imageinfo_queries;
@@ -2841,23 +2841,13 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
     const ImageSpec& spec(file->spec(subimage, miplevel));
     ParamValue tmpparam;
     const ParamValue* p = spec.find_attribute(dataname, tmpparam);
+
     // First test for exact base type match
-    //if (p && p->type().elementtype() == datatype.elementtype()) {
-    if (p){
-        std::cout << "basetype matches " << dataname << "\n";
-        // If the real data is int but user asks for float, translate it
-        if (index <  int(p->type().basevalues())){
-            std::cout << "index " << index << " #basevalues " <<  int(p->type().basevalues()) << "\n";
-            ((float *)data)[0] = ((float *)p->data())[index];
-            std::cout << "Value : " << ((float *)p->data())[index] << "\n";
-
-            return true;
-        }
-
-    } else if (p && p->type().basetype == TypeDesc::FLOAT
-               && datatype.basetype == TypeDesc::INT) {
-        if (index <  int(p->type().basevalues())){
-            ((float*)data)[0] = ((int*)p->data())[index];
+    if (p && p->type().elementtype() == datatype.elementtype()) {
+        if (index < int(p->type().basevalues())) {
+            for (int i = 0; i < datatype.size(); i++) {
+                ((char*)data)[i] = ((char*)p->data())[index*datatype.size()+i];
+            }
             return true;
         }
     }
