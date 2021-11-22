@@ -554,7 +554,7 @@ TextureSystemImpl::get_texture_info(TextureHandle* texture_handle,
                                     ustring dataname, TypeDesc datatype,
                                     void* data)
 {
-    std::cout << "get_texture_info texturesys.cpp\n";
+    //std::cout << "get_texture_info texturesys.cpp\n";
     bool ok
         = m_imagecache->get_image_info((ImageCache::ImageHandle*)texture_handle,
                                        (ImageCache::Perthread*)thread_info,
@@ -575,7 +575,7 @@ TextureSystemImpl::get_texture_info(TextureHandle* texture_handle,
                                     ustring dataname, TypeDesc datatype,
                                     int index, void* data)
 {
-    std::cout << "get_texture_info index texturesys.cpp\n";
+    //std::cout << "get_texture_info index texturesys.cpp\n";
 
     bool ok
         = m_imagecache->get_image_info((ImageCache::ImageHandle*)texture_handle,

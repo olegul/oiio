@@ -2561,7 +2561,7 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
         return true;                                                     \
     }
 
-    std::cout << "Getting image info\n";
+    //std::cout << "Getting image info\n";
 
     if (!thread_info)
         thread_info = get_perthread_info();
