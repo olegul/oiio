@@ -2804,6 +2804,7 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
     // spec.find_attribute().
     ParamValue tmpparam;
     const ParamValue* p = spec.find_attribute(dataname, tmpparam);
+    std::cout << "Copying array\n";
     if (p && p->type().basevalues() == datatype.basevalues()) {
         // First test for exact base type match
         if (p->type().basetype == datatype.basetype) {
@@ -2817,6 +2818,26 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
                 ((float*)data)[i] = ((int*)p->data())[i];
             return true;
         }
+    } else if (p->type().elementtype() == datatype.elementtype()
+               && int(p->type().basevalues()) <= int(datatype.basevalues())) {
+        // If we're quering an array that's smaller than our buffer, that's still a valid read
+        std::cout << "Input array is larger than queried array\n";
+        std::cout << "output array " << int(datatype.basevalues()) << "\n";
+        std::cout << "source array " << int(p->type().basevalues()) << "\n";
+        std::cout << "Data type size " << datatype.size() << "\n";
+        //memcpy(data, p->data(), datatype.size());
+        int bytes = datatype.elementtype().size();
+
+        std::cout << "Bytes " << bytes << "\n";
+        for (int i = 0; i < p->type().basevalues(); i++) {
+            for (int j = 0; j < bytes; j++) {
+                int index = i * bytes + j;
+                //std::cout << "Copying " << index << "\n";
+                ((char*)data)[index] = ((char*)p->data())[index];
+            }
+        }
+
+        return true;
     }
 
     return false;
@@ -2847,7 +2868,8 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
     if (p && p->type().elementtype() == datatype.elementtype()) {
         if (index >= 0 && index < int(p->type().basevalues())) {
             for (int i = 0; i < datatype.size(); i++) {
-                ((char*)data)[i] = ((char*)p->data())[index*datatype.size()+i];
+                ((char*)data)[i]
+                    = ((char*)p->data())[index * datatype.size() + i];
             }
             return true;
         }
