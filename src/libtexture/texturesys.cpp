@@ -573,14 +573,14 @@ bool
 TextureSystemImpl::get_texture_info(TextureHandle* texture_handle,
                                     Perthread* thread_info, int subimage,
                                     ustring dataname, TypeDesc datatype,
-                                    int index, void* data)
+                                    int& datalen, void* data)
 {
     //std::cout << "get_texture_info index texturesys.cpp\n";
 
     bool ok
         = m_imagecache->get_image_info((ImageCache::ImageHandle*)texture_handle,
                                        (ImageCache::Perthread*)thread_info,
-                                       subimage, 0, dataname, datatype, index, data);
+                                       subimage, 0, dataname, datatype, datalen, data);
     if (!ok) {
         std::string err = m_imagecache->geterror();
         if (!err.empty())

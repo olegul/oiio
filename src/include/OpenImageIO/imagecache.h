@@ -658,10 +658,11 @@ public:
                          ustring dataname, TypeDesc datatype, void *data) = 0;
 
 
-    // Add support for indexed array lookup
+    // Output an array and its length if the target output data is large
+    // enough to hold the array
     virtual bool get_image_info (ImageHandle *file, Perthread *thread_info,
                          int subimage, int miplevel,
-                         ustring dataname, TypeDesc datatype, int index, void *data) = 0;
+                         ustring dataname, TypeDesc datatype, int& datalen, void *data) = 0;
 
     /// Copy the ImageSpec associated with the named image (the first
     /// subimage & miplevel by default, or as set by `subimage` and

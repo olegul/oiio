@@ -844,7 +844,7 @@ public:
     virtual bool get_image_info(ImageCacheFile* file,
                                 ImageCachePerThreadInfo* thread_info,
                                 int subimage, int miplevel, ustring dataname,
-                                TypeDesc datatype, int index, void* data);
+                                TypeDesc datatype, int& datalen, void* data);
 
     /// Get the ImageSpec associated with the named image.  If the file
     /// is found and is an image format that can be read, store a copy

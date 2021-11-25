@@ -316,7 +316,7 @@ public:
     virtual bool get_texture_info(TextureHandle* texture_handle,
                                   Perthread* thread_info, int subimage,
                                   ustring dataname, TypeDesc datatype,
-                                  int index, void* data);
+                                  int& datalen, void* data);
 
     virtual bool get_imagespec(ustring filename, int subimage, ImageSpec& spec);
     virtual bool get_imagespec(TextureHandle* texture_handle,

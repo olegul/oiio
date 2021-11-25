@@ -2849,7 +2849,7 @@ bool
 ImageCacheImpl::get_image_info(ImageCacheFile* file,
                                ImageCachePerThreadInfo* thread_info,
                                int subimage, int miplevel, ustring dataname,
-                               TypeDesc datatype, int index, void* data)
+                               TypeDesc datatype, int& datalen, void* data)
 {
     // This is a special case of the "general case" above: if we're
     // looking up an array attribute, we also support looking up
@@ -2865,14 +2865,20 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
 
     // First test for exact base type match - say if we have a float
     // in, we should be reading a float or a float[]
-    if (p && p->type().elementtype() == datatype.elementtype()) {
-        if (index >= 0 && index < int(p->type().basevalues())) {
-            for (int i = 0; i < datatype.size(); i++) {
-                ((char*)data)[i]
-                    = ((char*)p->data())[index * datatype.size() + i];
+    if (p && p->type().elementtype() == datatype.elementtype()
+        && int(p->type().basevalues()) <= int(datatype.basevalues())) {
+        int bytes = datatype.elementtype().size();
+
+        //std::cout << "Bytes " << bytes << "\n";
+        for (int i = 0; i < p->type().basevalues(); i++) {
+            for (int j = 0; j < bytes; j++) {
+                int index = i * bytes + j;
+                //std::cout << "Copying " << index << "\n";
+                ((char*)data)[index] = ((char*)p->data())[index];
             }
-            return true;
         }
+        datalen = int(p->type().basevalues());
+        return true;
     }
     return false;
 }
