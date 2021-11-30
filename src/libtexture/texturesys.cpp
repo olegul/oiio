@@ -554,7 +554,6 @@ TextureSystemImpl::get_texture_info(TextureHandle* texture_handle,
                                     ustring dataname, TypeDesc datatype,
                                     void* data)
 {
-    //std::cout << "get_texture_info texturesys.cpp\n";
     bool ok
         = m_imagecache->get_image_info((ImageCache::ImageHandle*)texture_handle,
                                        (ImageCache::Perthread*)thread_info,
@@ -568,19 +567,16 @@ TextureSystemImpl::get_texture_info(TextureHandle* texture_handle,
 }
 
 
-// same as above, but we support an indexed array lookup
 bool
-TextureSystemImpl::get_texture_info(TextureHandle* texture_handle,
+TextureSystemImpl::get_texture_info_type(TextureHandle* texture_handle,
                                     Perthread* thread_info, int subimage,
-                                    ustring dataname, TypeDesc datatype,
-                                    int& datalen, void* data)
+                                    ustring dataname, TypeDesc& datatype)
 {
-    //std::cout << "get_texture_info index texturesys.cpp\n";
-
+    // This lets us ask for the datatype of a specific attribute
     bool ok
-        = m_imagecache->get_image_info((ImageCache::ImageHandle*)texture_handle,
+        = m_imagecache->get_image_info_type((ImageCache::ImageHandle*)texture_handle,
                                        (ImageCache::Perthread*)thread_info,
-                                       subimage, 0, dataname, datatype, datalen, data);
+                                       subimage, 0, dataname, datatype);
     if (!ok) {
         std::string err = m_imagecache->geterror();
         if (!err.empty())

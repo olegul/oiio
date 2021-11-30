@@ -2561,8 +2561,6 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
         return true;                                                     \
     }
 
-    //std::cout << "Getting image info\n";
-
     if (!thread_info)
         thread_info = get_perthread_info();
     ImageCacheStatistics& stats(thread_info->m_stats);
@@ -2804,7 +2802,6 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
     // spec.find_attribute().
     ParamValue tmpparam;
     const ParamValue* p = spec.find_attribute(dataname, tmpparam);
-    //std::cout << "Copying array\n";
     if (p && p->type().basevalues() == datatype.basevalues()) {
         // First test for exact base type match
         if (p->type().basetype == datatype.basetype) {
@@ -2818,26 +2815,6 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
                 ((float*)data)[i] = ((int*)p->data())[i];
             return true;
         }
-    } else if (p->type().elementtype() == datatype.elementtype()
-               && int(p->type().basevalues()) <= int(datatype.basevalues())) {
-        // If we're quering an array that's smaller than our buffer, that's still a valid read
-        //std::cout << "Input array is larger than queried array\n";
-        //std::cout << "output array " << int(datatype.basevalues()) << "\n";
-        //std::cout << "source array " << int(p->type().basevalues()) << "\n";
-        //std::cout << "Data type size " << datatype.size() << "\n";
-        //memcpy(data, p->data(), datatype.size());
-        int bytes = datatype.elementtype().size();
-
-        //std::cout << "Bytes " << bytes << "\n";
-        for (int i = 0; i < p->type().basevalues(); i++) {
-            for (int j = 0; j < bytes; j++) {
-                int index = i * bytes + j;
-                //std::cout << "Copying " << index << "\n";
-                ((char*)data)[index] = ((char*)p->data())[index];
-            }
-        }
-
-        return true;
     }
 
     return false;
@@ -2846,14 +2823,13 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
 }
 
 bool
-ImageCacheImpl::get_image_info(ImageCacheFile* file,
+ImageCacheImpl::get_image_info_type(ImageCacheFile* file,
                                ImageCachePerThreadInfo* thread_info,
                                int subimage, int miplevel, ustring dataname,
-                               TypeDesc datatype, int& datalen, void* data)
+                               TypeDesc& datatype)
 {
-    // This is a special case of the "general case" above: if we're
-    // looking up an array attribute, we also support looking up
-    // a specific index of that attribute
+    // Output the TypeDesc of a given attribute (if found). If not found
+    // we return UNKNOWN.
 
     ImageCacheStatistics& stats(thread_info->m_stats);
     ++stats.imageinfo_queries;
@@ -2863,23 +2839,12 @@ ImageCacheImpl::get_image_info(ImageCacheFile* file,
     ParamValue tmpparam;
     const ParamValue* p = spec.find_attribute(dataname, tmpparam);
 
-    // First test for exact base type match - say if we have a float
-    // in, we should be reading a float or a float[]
-    if (p && p->type().elementtype() == datatype.elementtype()
-        && int(p->type().basevalues()) <= int(datatype.basevalues())) {
-        int bytes = datatype.elementtype().size();
-
-        //std::cout << "Bytes " << bytes << "\n";
-        for (int i = 0; i < p->type().basevalues(); i++) {
-            for (int j = 0; j < bytes; j++) {
-                int index = i * bytes + j;
-                //std::cout << "Copying " << index << "\n";
-                ((char*)data)[index] = ((char*)p->data())[index];
-            }
-        }
-        datalen = int(p->type().basevalues());
+    if (p){
+        datatype = p->type();
         return true;
     }
+
+    datatype.basetype = TypeDesc::UNKNOWN;
     return false;
 }
 
